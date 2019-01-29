@@ -1,0 +1,13 @@
+{
+  "name": "editor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "opn": "^5.4.0",
+    "swagger-editor-dist": "^3.6.20"
+  }
+}
