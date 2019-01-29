@@ -1,42 +1,15 @@
-const {resolve} = require('path');
-const {writeFile, readFile, stat, mkdir} = require('fs-extra');
 const querystring = require('querystring');
-const {rootResolve} = require('../../../utils.js');
+const {writeFile, readFile, stat, mkdir, remove} = require('fs-extra');
 const {parse} = require('./openapi-parser.js');
 const generateTestScript = require('./test-template.js');
 
-const TEST_DIR = './test/';
 const INCLUDE_NON_REQUIRED = false;
 
-async function parseSpec(filepath, outpath) {
-  filepath = rootResolve(filepath);
-  outpath = rootResolve(outpath);
-  await parse(filepath).then(async spec => {
-    // const routes = spec.endpoints.map(route => {
-    //   return {
-    //     method: route.method,
-    //     path: route.path,
-    //     parameters: route.parameters,
-    //     url: route.url
-    //   };
-    // });
-
-    // const endpoints = {
-    //   schemes: spec.schemes,
-    //   host: spec.host,
-    //   basePath: spec.basePath,
-    //   endpoints: routes
-    // };
-
+async function parseSpec({source, outdir, filename, force}) {
+  return parse(source).then(async spec => {
     try {
-      // create endpoints file to be able to fill in values
-      await mkdir(
-        outpath
-        .split('/')
-        .slice(0, -1)
-        .join('/')
-      );
-      await writeFile(outpath, JSON.stringify(spec, null, 2));
+      await createDirIfNotExists(outdir, force);
+      await writeFile(`${outdir}${filename}`, JSON.stringify(spec, null, 2));
     } catch (err) {
       console.error(err);
       process.exit(1);
@@ -44,17 +17,9 @@ async function parseSpec(filepath, outpath) {
   });
 }
 
-async function loadEndpoints(filename, outpath, force) {
+async function loadEndpoints(filename, outdir, force) {
   try {
     const spec = JSON.parse(await readFile(filename, 'utf8'));
-
-    // if the output directory doesn't exist, make it
-    try {
-      await stat(TEST_DIR);
-    } catch (err) {
-      await mkdir(TEST_DIR);
-    }
-
     spec.endpoints.forEach(async route => {
       const url = generateUrlFromParameters({
         scheme: spec.schemes[0] || 'http',
@@ -64,7 +29,7 @@ async function loadEndpoints(filename, outpath, force) {
         parameters: route.parameters
       });
 
-      const testScript = generateTestScript({
+      const script = generateTestScript({
         method: route.method,
         url,
         payload: route.payload,
@@ -73,13 +38,27 @@ async function loadEndpoints(filename, outpath, force) {
 
       // write the test scripts
       try {
-        await writeFile(`./test/${toSnake(route.path)}.test.js`, testScript);
+        await createDirIfNotExists(outdir);
+        const path = `${outdir}${toSnake(route.path)}.test.js`;
+        try {
+          await stat(path);
+          // does exist, make sure for override
+          if (!force) {
+            console.error(
+              'Path already exists, use -F/--force to force override'
+            );
+            process.exit(1);
+          }
+        } catch (err) {
+          // doesn't exist, not a problem
+        }
+        await writeFile(path, script);
       } catch (err) {
         console.error(`Could not write file ${route.path}: ${err}`);
       }
     });
   } catch (err) {
-    console.log(`Could not load file ${filename}: ${err}`);
+    console.error(`Could not load file ${filename}: ${err}`);
   }
 }
 
@@ -87,6 +66,15 @@ module.exports = {
   parseSpec,
   loadEndpoints
 };
+
+async function createDirIfNotExists(dir) {
+  // if the output directory doesn't exist, make it
+  try {
+    await stat(dir);
+  } catch (err) {
+    await mkdir(dir);
+  }
+}
 
 function generateUrlFromParameters({scheme, host, basePath, path, parameters}) {
   const queryParams = parameters.filter(
