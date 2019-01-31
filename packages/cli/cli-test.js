@@ -1,9 +1,14 @@
+const {basename} = require('path');
+const {stat, mkdir} = require('fs-extra');
 const cli = require('commander');
 const which = require('which');
 const execa = require('execa');
 const chalk = require('chalk');
 const globby = require('globby');
 const {rootResolve} = require('../../utils');
+
+const DEFAULT_STAGE_LENGTH = '30s';
+const DEFAULT_VUES_PER_STAGE = 200;
 
 function splitList(items, token = ',') {
   return items.split(token);
@@ -18,17 +23,28 @@ cli
 .name('api-tools test')
 .description('Allows for integration, e2e, and performance testing')
 .option('-s, --source <glob>', 'glob of test files to run')
-// .option('-f, --format', 'test result output format (default stdout)')
-// .option('-o, --output', 'output folder for test results (default .)')
+.option(
+  '-o, --outdir <dir>',
+  'output folder for test results',
+  'test-results/'
+)
+.option(
+  '-f, --format <format>',
+  'test result output format [stdout|file]',
+  'stdout'
+)
 .option(
   '-m, --max-throughput',
-  'test max throughput for an endpoint (overrides --vus and --duration options)'
+  `test max throughput for an endpoint (overrides --duration options, steps ramps up by ${DEFAULT_VUES_PER_STAGE} every ${DEFAULT_STAGE_LENGTH} to --vus)`
 )
-.option('-v, --vus', 'number of concurrent virtual users (default 1)')
-.option('-d, --duration', 'duration of requests (default 1)')
+.option(
+  '-v, --vus <number>',
+  'number of concurrent virtual users (default: 1)'
+)
+.option('-d, --duration <time>', 'duration of requests (default: 1)')
 .option(
   '-e, --env <envVars>',
-  'supply environment variables to the test scripts',
+  'supply environment variables to the test scripts (e.g. USER_KEYs)',
   collect,
   []
 )
@@ -89,15 +105,38 @@ if (!process.argv.slice(2).length) {
       printDownloadLinks();
       process.exit(1);
     }
-    const args = [];
-    if (cli.vus) args.push('--vus', cli.vus);
-    if (cli.duration) args.push('--duration', cli.duration);
-    cli.env.forEach(value => args.push('--env', value));
+    let options = [];
+    if (cli.maxThroughput) {
+      options.push('--stage', createStageOption(cli.vus));
+    } else {
+      if (cli.vus) options.push('--vus', cli.vus);
+      if (cli.duration) options.push('--duration', cli.duration);
+    }
+    cli.env.forEach(value => options.push('--env', value));
+
+    if (cli.format === 'file') {
+      try {
+        await stat(cli.outdir);
+      } catch (_) {
+        await mkdir(cli.outdir);
+      }
+    }
 
     for (let i = 0; i < files.length; ++i) {
-      await execa('k6', ['run', ...args, files[i]], {stdio: 'inherit'}).catch(
-        err => console.error(err)
+      const path = files[i];
+      const args = ['run', ...options, path];
+      if (cli.format === 'file') {
+        args.push('>', `${cli.outdir}${basename(path).split('.')[0]}.txt`);
+      }
+      const command = ['k6', ...args].join(' ');
+      await execa
+      .shell(command, {stdio: 'inherit'})
+      .catch(err =>
+        console.error(`Error with script ${path}: ${err.stderr}`)
       );
+      // await execa('k6', args, {stdio: 'inherit'}).catch(err =>
+      //   console.error(err)
+      // );
     }
     // files.reduce(async(prev, file) => {
     //   await execa('k6', ['run', file], {stdio: 'inherit'}).catch(err =>
@@ -116,4 +155,18 @@ function programExists(program) {
 function printDownloadLinks() {
   console.log(chalk.underline('https://docs.k6.io/docs/installation'));
   // console.log(chalk.underline('https://docs.docker.com/install/'));
+}
+
+function createStageOption(vus) {
+  console.log(vus);
+  const numStages = vus / 200;
+  if (numStages < 1) {
+    throw new Error('Not enough vus to stage, set a higher number with --vus');
+  } else {
+    let stages = '';
+    for (let i = 1; i <= numStages; ++i) {
+      stages += `${DEFAULT_STAGE_LENGTH}:${DEFAULT_VUES_PER_STAGE * i},`;
+    }
+    return stages.substring(0, stages.length - 1);
+  }
 }
