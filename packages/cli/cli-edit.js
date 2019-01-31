@@ -1,6 +1,9 @@
 const cli = require('commander');
 const {startEditor} = require('../editor/');
 
-cli.name('api-tools edit').parse(process.argv);
+cli
+.name('api-tools edit')
+.option('-p, --port', 'specify port for the local server', 3000)
+.parse(process.argv);
 
-startEditor();
+startEditor(cli.port);

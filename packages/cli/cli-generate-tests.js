@@ -8,39 +8,64 @@ const DEFAULT_FILENAME = 'endpoints.json';
 cli
 .name('api-tools generate tests')
 .description(
-  'Generate k6 test scripts based on a Swagger/OpenAPI document. It is a two step process: the first generates a JSON file that can be used to populate test scripts options per endpoint, and the second is to read the JSON document to generate the scripts themselves.'
+  'Generate k6 test scripts based on a Swagger/OpenAPI document. It is a two step process: the first extracts the endpoints from the Swagger document into a JSON-based config file that can be used to populate test scripts options per endpoint, and the second is to read the config to generate the scripts themselves.'
 )
-.option('-s, --source <path>', 'Swagger/OpenAPI document')
+.option('-s, --source <file>', 'Swagger/OpenAPI document')
+.option('-c, --config <file>', 'config file used to generate test scripts')
 .option(
   '-o, --outdir <dir>',
-  'output folder for generated files (default tests/)'
+  'output folder for generated files',
+  DEFAULT_OUTDIR
 )
-.option('-f, --filename', 'define endpoint filename')
-.option('-e, --endpoint', 'define a specific endpoint to generate test')
+.option(
+  '-f, --filename <filename>',
+  'define config extract filename',
+  DEFAULT_FILENAME
+)
+.option('-j, --json-only', 'only generate the json config document')
+.option(
+  '-e, --only-endpoints <regexps>',
+  'only create config file or test scripts for endpoints that match the given regexps',
+  split
+)
 .option('-F, --force', 'forces overwriting of files')
 .parse(process.argv);
 
-if (!cli.source) {
-  console.error('Need a source file');
+function split(items, token = ',') {
+  return items.split(token);
+}
+
+if (!cli.source && !cli.config) {
+  console.error('Need a source or config file');
   process.exit(1);
 }
 
 (async() => {
-  const source = rootResolve(cli.source);
   const outdir = addTrailingSlash(rootResolve(cli.outdir || DEFAULT_OUTDIR));
   const filename = cli.filename || DEFAULT_FILENAME;
-  const filepath = `${outdir}${filename}`;
-  try {
-    await parseSpec({
-      source,
+  const configFile = cli.config || `${outdir}${filename}`;
+  if (cli.source) {
+    const source = rootResolve(cli.source);
+    try {
+      await parseSpec({
+        source,
+        outdir,
+        filename,
+        config: cli.config,
+        force: cli.force,
+        endpoints: cli.onlyEndpoints
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  if (!cli.jsonOnly || cli.config) {
+    await loadEndpoints({
+      config: configFile,
       outdir,
-      filename,
-      endpoint: cli.endpoint,
-      force: cli.force
+      force: cli.force,
+      endpoints: cli.onlyEndpoints
     });
-    await loadEndpoints(filepath, outdir, cli.force);
-  } catch (err) {
-    console.error(err);
   }
 })();
 

@@ -17,9 +17,18 @@ async function parseSpec({source, outdir, filename, force}) {
   });
 }
 
-async function loadEndpoints(filename, outdir, force) {
+async function loadEndpoints({config, outdir, force, endpoints}) {
   try {
-    const spec = JSON.parse(await readFile(filename, 'utf8'));
+    const spec = JSON.parse(await readFile(config, 'utf8'));
+
+    // if providing specific endpoints, filter out all the others
+    if (endpoints != null && endpoints.length > 0) {
+      spec.endpoints = spec.endpoints.filter(
+        endpoint =>
+          endpoints.filter(e => new RegExp(e).test(endpoint.path)).length > 0
+      );
+    }
+
     spec.endpoints.forEach(async route => {
       const url = generateUrlFromParameters({
         scheme: spec.schemes[0] || 'http',
@@ -39,7 +48,7 @@ async function loadEndpoints(filename, outdir, force) {
       // write the test scripts
       try {
         await createDirIfNotExists(outdir);
-        const path = `${outdir}${toSnake(route.path)}.test.js`;
+        const path = `${outdir}${route.method}-${toSnake(route.path)}.test.js`;
         try {
           await stat(path);
           // does exist, make sure for override
@@ -58,7 +67,7 @@ async function loadEndpoints(filename, outdir, force) {
       }
     });
   } catch (err) {
-    console.error(`Could not load file ${filename}: ${err}`);
+    console.error(`Could not load file ${config}: ${err}`);
   }
 }
 
@@ -136,8 +145,8 @@ function createQueryString(
         );
 }
 
-function toSnake(path) {
-  return path
+function toSnake(string) {
+  return string
   .replace(/^\//, '')
   .split('/')
   .join('-');

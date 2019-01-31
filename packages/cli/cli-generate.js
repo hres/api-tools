@@ -11,5 +11,5 @@ cli
 .parse(process.argv);
 
 if (!process.argv.slice(2).length) {
-  cli.outputHelp();
+  cli.help();
 }

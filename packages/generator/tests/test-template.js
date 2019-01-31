@@ -2,13 +2,27 @@ module.exports = ({method, url, payload, requestParameters}) => {
   return `
 import http from 'k6/http';
 import {check} from 'k6';
-import equals from '../node_modules/fast-deep-equal/index.js';
+import {Rate} from 'k6/metrics';
 
 const user_key = __ENV.USER_KEY;
 const method = __ENV.METHOD || '${method}';
 const url = \`${url}\`;
 const payload = ${payload};
 const parameters = ${requestParameters};
+
+const myFailRate = new Rate('failed requests');
+
+export const options = {
+  thresholds: {
+    'failed requests': [
+      {
+        threshold: 'rate<0.1',
+        abortOnFail: true,
+        delayAbortEval: '10s'
+      }
+    ]
+  }
+};
 
 export default function() {
   const response = http.request(
@@ -17,6 +31,8 @@ export default function() {
     payload,
     parameters
   );
+
+  myFailRate.add(response.status !== 200);
 
   check(response, {
     'status 200': r => r.status === 200,

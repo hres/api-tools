@@ -1,5 +1,4 @@
 const cli = require('commander');
-const which = require('which');
 
 cli
 .name('api-tools generate api')
