@@ -1,5 +1,5 @@
 const {basename} = require('path');
-const {stat, mkdir} = require('fs-extra');
+const {stat, mkdirp} = require('fs-extra');
 const cli = require('commander');
 const which = require('which');
 const execa = require('execa');
@@ -8,7 +8,7 @@ const globby = require('globby');
 const {rootResolve} = require('../../utils');
 
 const DEFAULT_STAGE_LENGTH = '30s';
-const DEFAULT_VUES_PER_STAGE = 200;
+const DEFAULT_VUES_PER_STAGE = 50;
 
 function splitList(items, token = ',') {
   return items.split(token);
@@ -118,7 +118,7 @@ if (!process.argv.slice(2).length) {
       try {
         await stat(cli.outdir);
       } catch (_) {
-        await mkdir(cli.outdir);
+        await mkdirp(cli.outdir);
       }
     }
 

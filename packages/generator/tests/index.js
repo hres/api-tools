@@ -1,5 +1,5 @@
 const querystring = require('querystring');
-const {writeFile, readFile, stat, mkdir, remove} = require('fs-extra');
+const {writeFile, readFile, stat, mkdirp, remove} = require('fs-extra');
 const {parse} = require('./openapi-parser.js');
 const generateTestScript = require('./test-template.js');
 
@@ -81,7 +81,7 @@ async function createDirIfNotExists(dir) {
   try {
     await stat(dir);
   } catch (err) {
-    await mkdir(dir);
+    await mkdirp(dir);
   }
 }
 
