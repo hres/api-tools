@@ -75,7 +75,8 @@ export default function() {
 
 ### TODO
 
-- [ ] allow for compiling of test results from `api-tools test --format file` into better form
+- [ ] allow for compiling of test results from `api-tools test --format file` into better output
+- [ ] pass all arguments from config file into template function
 - [ ] create addition test script defaults
 - [ ] test, test, test!
 

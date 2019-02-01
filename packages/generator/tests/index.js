@@ -50,6 +50,7 @@ async function loadEndpoints({config, outdir, force, endpoints, template}) {
 
       const templateSource = route.template || template;
       if (templateSource != null) {
+        console.log(`Using template: ${templateSource}`);
         try {
           script = require(templateSource)(args);
         } catch (err) {
@@ -78,6 +79,7 @@ async function loadEndpoints({config, outdir, force, endpoints, template}) {
           // doesn't exist, not a problem
         }
         await writeFile(path, script);
+        console.log(`Generated test script: ${path}`);
       } catch (err) {
         console.error(`Could not write file ${route.path}: ${err}`);
       }
