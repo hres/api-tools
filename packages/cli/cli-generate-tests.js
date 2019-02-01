@@ -24,7 +24,11 @@ cli
 )
 .option('-j, --json-only', 'only generate the json config document')
 .option(
-  '-e, --only-endpoints <regexps>',
+  '-t, --template <path>',
+  'a file that exports a javascript function that creates a test script'
+)
+.option(
+  '-e, --endpoints <regexps>',
   'only create config file or test scripts for endpoints that match the given regexps',
   split
 )
@@ -64,7 +68,8 @@ if (!cli.source && !cli.config) {
       config: configFile,
       outdir,
       force: cli.force,
-      endpoints: cli.onlyEndpoints
+      endpoints: cli.onlyEndpoints,
+      template: rootResolve(cli.template)
     });
   }
 })();

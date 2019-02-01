@@ -41,7 +41,7 @@ cli
   '-v, --vus <number>',
   'number of concurrent virtual users (default: 1)'
 )
-.option('-d, --duration <time>', 'duration of requests (default: 1)')
+.option('-d, --duration <time>', 'duration of requests (default: 1s)')
 .option(
   '-e, --env <envVars>',
   'supply environment variables to the test scripts (e.g. USER_KEYs)',
@@ -135,15 +135,7 @@ if (!process.argv.slice(2).length) {
       await execa
       .shell(command, {stdio: 'inherit'})
       .catch(err => console.error(`Error with script ${path}: ${err}`));
-      // await execa('k6', args, {stdio: 'inherit'}).catch(err =>
-      //   console.error(err)
-      // );
     }
-    // files.reduce(async(prev, file) => {
-    //   await execa('k6', ['run', file], {stdio: 'inherit'}).catch(err =>
-    //     console.error(err)
-    //   );
-    // }, Promise.resolve());
   } catch (err) {
     console.error(err);
   }

@@ -5,8 +5,8 @@ cli
 .description(
   'Depending on command options, will parse a Swagger/OpenAPI v2 compliant document and generate corresponding source code, test files, or documentation from it'
 )
-.command('api', 'generate api source code')
-.command('documentation', 'generate api documentation')
+// .command('api', 'generate api source code')
+// .command('documentation', 'generate api documentation')
 .command('tests', 'generate test scripts')
 .parse(process.argv);
 

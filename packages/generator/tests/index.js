@@ -1,7 +1,7 @@
 const querystring = require('querystring');
-const {writeFile, readFile, stat, mkdirp, remove} = require('fs-extra');
+const {writeFile, readFile, stat, mkdirp} = require('fs-extra');
 const {parse} = require('./openapi-parser.js');
-const generateTestScript = require('./test-template.js');
+const generateDefaultTestScript = require('./test-template.js');
 
 const INCLUDE_NON_REQUIRED = false;
 
@@ -17,7 +17,7 @@ async function parseSpec({source, outdir, filename, force}) {
   });
 }
 
-async function loadEndpoints({config, outdir, force, endpoints}) {
+async function loadEndpoints({config, outdir, force, endpoints, template}) {
   try {
     const spec = JSON.parse(await readFile(config, 'utf8'));
 
@@ -38,12 +38,28 @@ async function loadEndpoints({config, outdir, force, endpoints}) {
         parameters: route.parameters
       });
 
-      const script = generateTestScript({
+      // if user has provided a `template` prop in the config file or provided
+      // a `template` option through the cli, use that instead
+      let script;
+      const args = {
         method: route.method,
         url,
         payload: route.payload,
         requestParameters: route.requestParameters
-      });
+      };
+
+      const templateSource = route.template || template;
+      if (templateSource != null) {
+        try {
+          script = require(templateSource)(args);
+        } catch (err) {
+          console.error(`Could not find template ${templateSource}`);
+          console.error(err);
+          process.exit(1);
+        }
+      } else {
+        script = generateDefaultTestScript(args);
+      }
 
       // write the test scripts
       try {
