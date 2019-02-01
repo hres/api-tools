@@ -1,11 +1,11 @@
 {
   "name": "api-tools",
-  "version": "1.0.0",
+  "version": "0.0.1-lerna",
   "description": "",
   "main": "packages/cli/cli.js",
   "bin": "./packages/cli/cli.js",
   "scripts": {
-    "build": "pkg . --targets node10 --out-path bin/"
+    "build": "pkg . --targets node10-linux,node10-macos,node10-win --out-path bin/"
   },
   "repository": {
     "type": "git",

@@ -95,6 +95,8 @@ if (!process.argv.slice(2).length) {
     // } else {
 
     const files = await globby(rootResolve(cli.source));
+    if (files.length === 0)
+      throw new Error(`${cli.source} did not match any options`);
 
     if (!programExists('k6')) {
       console.log(
@@ -124,6 +126,7 @@ if (!process.argv.slice(2).length) {
 
     for (let i = 0; i < files.length; ++i) {
       const path = files[i];
+      console.log(`Running test: ${path}`);
       const args = ['run', ...options, path];
       if (cli.format === 'file') {
         args.push('>', `${cli.outdir}${basename(path).split('.')[0]}.txt`);
@@ -131,9 +134,7 @@ if (!process.argv.slice(2).length) {
       const command = ['k6', ...args].join(' ');
       await execa
       .shell(command, {stdio: 'inherit'})
-      .catch(err =>
-        console.error(`Error with script ${path}: ${err.stderr}`)
-      );
+      .catch(err => console.error(`Error with script ${path}: ${err}`));
       // await execa('k6', args, {stdio: 'inherit'}).catch(err =>
       //   console.error(err)
       // );

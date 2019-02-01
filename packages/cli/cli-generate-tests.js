@@ -1,6 +1,6 @@
 const cli = require('commander');
 const {parseSpec, loadEndpoints} = require('../generator/tests/');
-const {rootResolve} = require('../../utils');
+const {rootResolve, addTrailingSlash} = require('../../utils');
 
 const DEFAULT_OUTDIR = 'tests/';
 const DEFAULT_FILENAME = 'endpoints.json';
@@ -68,8 +68,3 @@ if (!cli.source && !cli.config) {
     });
   }
 })();
-
-function addTrailingSlash(path) {
-  if (path == null) return null;
-  return path[path.length - 1] === '/' ? path : path + '/';
-}
