@@ -70,3 +70,16 @@ export default function() {
 ### Testing
 
 `api-tools test` will use [k6](https://k6.io) to execute a collection of files. You can use `-s,--source` to define a glob pattern which will define which tests to run.
+
+## Want to help?
+
+### TODO
+
+- [ ] allow for compiling of test results from `api-tools test --format file` into better form
+- [ ] create addition test script defaults
+- [ ] test, test, test!
+
+### Things to note
+
+- `lerna` is used to manage this project as a whole, even though each sub project is it's own repo
+- k6 scripts, although written in javascript, are NOT node modules when they are run. If you are using libraries from npm, they must either have 0 dependencies and not use node builtins, or you must first bundle it into a browser-friendly version (i.e. `browserify`, `rollup`, `webpack`, etc.)

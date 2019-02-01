@@ -36,7 +36,8 @@
   },
   "pkg": {
     "scripts": [
-      "packages/cli/cli*.js"
+      "packages/cli/cli*.js",
+      "packages/generator/node_modules/fast-deep-equal/index.js"
     ],
     "assets": [
       "packages/editor/node_modules/swagger-editor-dist"
