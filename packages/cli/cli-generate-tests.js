@@ -1,9 +1,9 @@
 const cli = require('commander');
-const {parseSpec, loadEndpoints} = require('../generator/tests/');
-const {rootResolve, addTrailingSlash} = require('../../utils');
+const { parseSpec, loadEndpoints } = require('../generator/tests/');
+const { rootResolve, addTrailingSlash } = require('../../utils');
 
 const DEFAULT_OUTDIR = 'tests/';
-const DEFAULT_FILENAME = 'endpoints.json';
+const DEFAULT_FILENAME = 'test-config.json';
 
 cli
 .name('api-tools generate tests')
@@ -11,6 +11,7 @@ cli
   'Generate k6 test scripts based on a Swagger/OpenAPI document. It is a two step process: the first extracts the endpoints from the Swagger document into a JSON-based config file that can be used to populate test scripts options per endpoint, and the second is to read the config to generate the scripts themselves.'
 )
 .option('-s, --source <file>', 'Swagger/OpenAPI document')
+.option('-C, --config-only', 'only generate the json config document')
 .option('-c, --config <file>', 'config file used to generate test scripts')
 .option(
   '-o, --outdir <dir>',
@@ -22,7 +23,6 @@ cli
   'define config extract filename',
   DEFAULT_FILENAME
 )
-.option('-j, --json-only', 'only generate the json config document')
 .option(
   '-t, --template <path>',
   'a file that exports a javascript function that creates a test script'
@@ -64,7 +64,7 @@ if (!cli.source && !cli.config) {
       console.error(err);
     }
   }
-  if (!cli.jsonOnly || cli.config) {
+  if (!cli.configOnly || cli.config) {
     await loadEndpoints({
       config: configFile,
       outdir,

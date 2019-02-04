@@ -1,15 +1,15 @@
-const {join} = require('path');
+const { join } = require('path');
 const micro = require('micro');
 const handler = require('serve-handler');
 const which = require('which');
 const execa = require('execa');
 const opn = require('opn');
-const {red} = require('chalk');
+const { red } = require('chalk');
 
 async function startEditor(port = 3000) {
   const basePath = join(__dirname, 'node_modules', 'swagger-editor-dist');
   const server = micro(async(req, res) => {
-    return handler(req, res, {public: basePath});
+    return handler(req, res, { public: basePath });
   });
 
   server.listen(port, () =>
@@ -49,4 +49,4 @@ async function startEditor(port = 3000) {
   return server;
 }
 
-module.exports = {startEditor};
+module.exports = { startEditor };

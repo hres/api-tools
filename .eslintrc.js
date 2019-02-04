@@ -27,7 +27,7 @@ module.exports = {
     quotes: ['error', 'single', {allowTemplateLiterals: true}],
     semi: ['error', 'always'],
     'space-in-parens': ['error', 'never'],
-    'object-curly-spacing': ['error', 'never'],
+    'object-curly-spacing': ['error', 'always'],
     'space-before-function-paren': ['error', 'never'],
     'brace-style': ['error', 'stroustrup', {allowSingleLine: true}]
   }
