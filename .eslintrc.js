@@ -28,6 +28,7 @@ module.exports = {
     semi: ['error', 'always'],
     'space-in-parens': ['error', 'never'],
     'object-curly-spacing': ['error', 'never'],
-    'space-before-function-paren': ['error', 'never']
+    'space-before-function-paren': ['error', 'never'],
+    'brace-style': ['error', 'stroustrup', {allowSingleLine: true}]
   }
 };

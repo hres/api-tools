@@ -59,7 +59,8 @@ if (!cli.source && !cli.config) {
         force: cli.force,
         endpoints: cli.onlyEndpoints
       });
-    } catch (err) {
+    }
+    catch (err) {
       console.error(err);
     }
   }

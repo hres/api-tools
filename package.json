@@ -5,6 +5,7 @@
   "main": "packages/cli/cli.js",
   "bin": "./packages/cli/cli.js",
   "scripts": {
+    "lint": "eslint --fix ./packages/",
     "build": "pkg . --targets node10-linux,node10-macos,node10-win --out-path bin/"
   },
   "repository": {

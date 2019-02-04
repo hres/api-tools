@@ -24,7 +24,8 @@ async function startEditor(port = 3000) {
     await opn(path, {
       wait: false
     });
-  } else {
+  }
+  else {
     try {
       const xdgOpenExists = which.sync('xdg-open');
       if (!xdgOpenExists) {
@@ -35,7 +36,8 @@ async function startEditor(port = 3000) {
         );
       }
       await execa('xdg-open', [path]);
-    } catch (err) {
+    }
+    catch (err) {
       console.log(
         red(
           `Unable to open your browser automatically. Please open the following URI in your browser:\n\n${path}\n\n`

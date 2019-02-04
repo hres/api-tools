@@ -10,7 +10,8 @@ async function parseSpec({source, outdir, filename, force}) {
     try {
       await createDirIfNotExists(outdir, force);
       await writeFile(`${outdir}${filename}`, JSON.stringify(spec, null, 2));
-    } catch (err) {
+    }
+    catch (err) {
       console.error(err);
       process.exit(1);
     }
@@ -53,12 +54,14 @@ async function loadEndpoints({config, outdir, force, endpoints, template}) {
         console.log(`Using template: ${templateSource}`);
         try {
           script = require(templateSource)(args);
-        } catch (err) {
+        }
+        catch (err) {
           console.error(`Could not find template ${templateSource}`);
           console.error(err);
           process.exit(1);
         }
-      } else {
+      }
+      else {
         script = generateDefaultTestScript(args);
       }
 
@@ -75,16 +78,19 @@ async function loadEndpoints({config, outdir, force, endpoints, template}) {
             );
             process.exit(1);
           }
-        } catch (err) {
+        }
+        catch (err) {
           // doesn't exist, not a problem
         }
         await writeFile(path, script);
         console.log(`Generated test script: ${path}`);
-      } catch (err) {
+      }
+      catch (err) {
         console.error(`Could not write file ${route.path}: ${err}`);
       }
     });
-  } catch (err) {
+  }
+  catch (err) {
     console.error(`Could not load file ${config}: ${err}`);
   }
 }
@@ -98,7 +104,8 @@ async function createDirIfNotExists(dir) {
   // if the output directory doesn't exist, make it
   try {
     await stat(dir);
-  } catch (err) {
+  }
+  catch (err) {
     await mkdirp(dir);
   }
 }
@@ -134,7 +141,8 @@ function replacePathParams(path, parameters) {
         console.error(
           `In ${path}, no matching parameter name for ${component}`
         );
-      } else {
+      }
+      else {
         return replacement.value;
       }
     }

@@ -51,7 +51,8 @@ module.exports = {
           console.error(
             `In ${path}, no matching parameter name for ${component}`
           );
-        } else {
+        }
+        else {
           const value = getValue(replacement);
           return value;
         }
