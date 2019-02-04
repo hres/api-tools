@@ -1,11 +1,11 @@
-const {basename} = require('path');
-const {stat, mkdirp} = require('fs-extra');
+const { basename } = require('path');
+const { stat, mkdirp } = require('fs-extra');
 const cli = require('commander');
 const which = require('which');
 const execa = require('execa');
 const chalk = require('chalk');
 const globby = require('globby');
-const {rootResolve} = require('../../utils');
+const { rootResolve } = require('../../utils');
 
 const DEFAULT_STAGE_LENGTH = '30s';
 const DEFAULT_VUES_PER_STAGE = 50;
@@ -120,7 +120,7 @@ if (!process.argv.slice(2).length) {
       }
       const command = ['k6', ...args].join(' ');
       await execa
-      .shell(command, {stdio: 'inherit'})
+      .shell(command, { stdio: 'inherit' })
       .catch(err => console.error(`Error with script ${path}: ${err}`));
     }
   }
@@ -130,7 +130,7 @@ if (!process.argv.slice(2).length) {
 })();
 
 function programExists(program) {
-  return which.sync(program, {nothrow: true});
+  return which.sync(program, { nothrow: true });
 }
 
 function printDownloadLinks() {
@@ -139,7 +139,7 @@ function printDownloadLinks() {
 
 function createStageOption(vus) {
   console.log(vus);
-  const numStages = vus / 200;
+  const numStages = vus / DEFAULT_VUES_PER_STAGE;
   if (numStages < 1) {
     throw new Error('Not enough vus to stage, set a higher number with --vus');
   }

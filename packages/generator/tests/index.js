@@ -1,11 +1,12 @@
 const querystring = require('querystring');
-const {writeFile, readFile, stat, mkdirp} = require('fs-extra');
-const {parse} = require('./openapi-parser.js');
+const { writeFile, readFile, stat, mkdirp } = require('fs-extra');
+const merge = require('lodash.merge');
+const { parse, getValue } = require('./openapi-parser.js');
 const generateDefaultTestScript = require('./test-template.js');
 
 const INCLUDE_NON_REQUIRED = false;
 
-async function parseSpec({source, outdir, filename, force}) {
+async function parseSpec({ source, outdir, filename, force }) {
   return parse(source).then(async spec => {
     try {
       await createDirIfNotExists(outdir, force);
@@ -18,7 +19,7 @@ async function parseSpec({source, outdir, filename, force}) {
   });
 }
 
-async function loadEndpoints({config, outdir, force, endpoints, template}) {
+async function loadEndpoints({ config, outdir, force, endpoints, template }) {
   try {
     const spec = JSON.parse(await readFile(config, 'utf8'));
 
@@ -31,13 +32,28 @@ async function loadEndpoints({config, outdir, force, endpoints, template}) {
     }
 
     spec.endpoints.forEach(async route => {
+      const { path, parameters } = route;
+      const queryParameters = parameters.filter(
+        parameter => parameter.in === 'query'
+      );
+      const pathParameters = parameters.filter(
+        parameter => parameter.in === 'path'
+      );
+      const headerParameters = parameters.filter(
+        parameter => parameter.in === 'header'
+      );
       const url = generateUrlFromParameters({
         scheme: spec.schemes[0] || 'http',
         host: spec.host,
         basePath: spec.basePath,
-        path: route.path,
-        parameters: route.parameters
+        path,
+        queryParameters,
+        pathParameters
       });
+
+      const requestParameters = {
+        headers: generateHeaderParameters({ headerParameters })
+      };
 
       // if user has provided a `template` prop in the config file or provided
       // a `template` option through the cli, use that instead
@@ -46,7 +62,7 @@ async function loadEndpoints({config, outdir, force, endpoints, template}) {
         method: route.method,
         url,
         payload: route.payload,
-        requestParameters: route.requestParameters
+        requestParameters: merge(route.requestParameters, requestParameters)
       };
 
       const templateSource = route.template || template;
@@ -110,18 +126,18 @@ async function createDirIfNotExists(dir) {
   }
 }
 
-function generateUrlFromParameters({scheme, host, basePath, path, parameters}) {
-  const queryParams = parameters.filter(
-    parameter => parameter.in && parameter.in === 'query'
-  );
-  const pathParams = parameters.filter(
-    parameter => parameter.in && parameter.in === 'path'
-  );
-
+function generateUrlFromParameters({
+  scheme,
+  host,
+  basePath,
+  path,
+  queryParameters,
+  pathParameters
+}) {
   return `${scheme}://${host}${basePath}${replacePathParams(
     path,
-    pathParams
-  )}${createQueryString(queryParams)}`;
+    pathParameters
+  )}${createQueryString(queryParameters)}`;
 }
 
 function replacePathParams(path, parameters) {
@@ -155,7 +171,7 @@ function createQueryString(
   parameters,
   includeNonRequired = INCLUDE_NON_REQUIRED
 ) {
-  return parameters.length === 0
+  return parameters == null || parameters.length === 0
     ? ''
     : '?' +
         querystring.unescape(
@@ -164,11 +180,17 @@ function createQueryString(
               if (parameter.required || includeNonRequired) {
                 obj[parameter.name] = parameter.value;
               }
-
               return obj;
             }, {})
           )
         );
+}
+
+function generateHeaderParameters({ headerParameters }) {
+  return headerParameters.reduce((prev, curr) => {
+    prev[curr.name] = getValue(curr);
+    return prev;
+  }, {});
 }
 
 function toSnake(string) {

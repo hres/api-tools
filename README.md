@@ -19,7 +19,7 @@ A collection of tools to help with building GoC compliant API's, including:
 
 #### Creating test script templates
 
-The test templates **must** be a [nodejs](https://nodejs.org) module that exports a single function. The function will be provided with parameters from the config file that you can use to populate the file. [k6](https://k6.io) allows provided environment variables from cli, to avoid polluting source code repos with secrets, so use them when needed.
+The test templates **must** be a [nodejs](https://nodejs.org) module that exports a single function. The function will be provided with parameters from the config file that you can use to populate the file. [k6](https://k6.io) allows providing environment variables from cli, to avoid polluting source code repos with secrets, so use them when needed.
 
 The default template, which uses JS template literals, looks like this:
 
@@ -29,11 +29,11 @@ import http from 'k6/http';
 import {check} from 'k6';
 import {Rate} from 'k6/metrics';
 
-const user_key = __ENV.USER_KEY;
+const key = __ENV.USER_KEY;
 const method = __ENV.METHOD || '${method}';
 const url = \`${url}\`;
-const payload = ${payload};
-const parameters = ${requestParameters};
+const payload = JSON.parse(\`${JSON.stringify(payload)}\`);
+const parameters = JSON.parse(\`${JSON.stringify(requestParameters)}\`);
 
 const myFailRate = new Rate('failed requests');
 

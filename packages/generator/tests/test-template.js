@@ -1,13 +1,13 @@
-module.exports = ({method, url, payload, requestParameters}) => `
+module.exports = ({ method, url, payload, requestParameters }) => `
 import http from 'k6/http';
 import {check} from 'k6';
 import {Rate} from 'k6/metrics';
 
-const user_key = __ENV.USER_KEY;
+const key = __ENV.USER_KEY;
 const method = __ENV.METHOD || '${method}';
 const url = \`${url}\`;
-const payload = ${payload};
-const parameters = ${requestParameters};
+const payload = JSON.parse(\`${JSON.stringify(payload)}\`);
+const parameters = JSON.parse(\`${JSON.stringify(requestParameters)}\`);
 
 const myFailRate = new Rate('failed requests');
 
