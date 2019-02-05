@@ -1,6 +1,6 @@
 const cli = require('commander');
-const { parseSpec, loadEndpoints } = require('../generator/tests/');
-const { rootResolve, addTrailingSlash } = require('../../utils');
+const { parseSpec, loadEndpoints } = require('@api-tools/generator').Tests;
+const { rootResolve, addTrailingSlash } = require('@api-tools/utils');
 
 const DEFAULT_OUTDIR = 'tests/';
 const DEFAULT_FILENAME = 'test-config.json';

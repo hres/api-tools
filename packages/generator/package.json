@@ -1,5 +1,5 @@
 {
-  "name": "generator",
+  "name": "@api-tools/generator",
   "version": "0.0.2-alpha.2",
   "description": "",
   "main": "index.js",
@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^2.4.2",
     "fast-deep-equal": "^2.0.1",
+    "fs-extra": "^7.0.1",
     "json-schema-ref-parser": "^6.0.3",
-    "lodash.merge": "^4.6.1"
+    "lodash": "^4.17.11"
   }
 }

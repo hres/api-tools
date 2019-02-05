@@ -5,7 +5,7 @@ const which = require('which');
 const execa = require('execa');
 const chalk = require('chalk');
 const globby = require('globby');
-const { rootResolve } = require('../../utils');
+const { rootResolve } = require('@api-tools/utils');
 
 const DEFAULT_STAGE_LENGTH = '30s';
 const DEFAULT_VUES_PER_STAGE = 50;

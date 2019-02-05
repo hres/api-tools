@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const pkg = require('../../package.json');
+const pkg = require('./package.json');
 const cli = require('commander');
 
 cli

@@ -1,6 +1,7 @@
 const querystring = require('querystring');
 const { writeFile, readFile, stat, mkdirp } = require('fs-extra');
-const merge = require('lodash.merge');
+const { merge, kebabCase } = require('lodash');
+const { red } = require('chalk');
 const { parse, getValue } = require('./openapi-parser.js');
 const generateDefaultTestScript = require('./test-template.js');
 
@@ -13,6 +14,7 @@ async function parseSpec({ source, outdir, filename, force }) {
       await writeFile(`${outdir}${filename}`, JSON.stringify(spec, null, 2));
     }
     catch (err) {
+      console.error(red(`Could not write file ${outdir}`));
       console.error(err);
       process.exit(1);
     }
@@ -72,7 +74,7 @@ async function loadEndpoints({ config, outdir, force, endpoints, template }) {
           script = require(templateSource)(args);
         }
         catch (err) {
-          console.error(`Could not find template ${templateSource}`);
+          console.error(red(`Could not find template ${templateSource}`));
           console.error(err);
           process.exit(1);
         }
@@ -84,7 +86,9 @@ async function loadEndpoints({ config, outdir, force, endpoints, template }) {
       // write the test scripts
       try {
         await createDirIfNotExists(outdir);
-        const path = `${outdir}${route.method}-${toSnake(route.path)}.test.js`;
+        const path = `${outdir}${route.method}-${kebabCase(
+          route.path
+        )}.test.js`;
         try {
           await stat(path);
           // does exist, make sure for override
@@ -102,12 +106,16 @@ async function loadEndpoints({ config, outdir, force, endpoints, template }) {
         console.log(`Generated test script: ${path}`);
       }
       catch (err) {
-        console.error(`Could not write file ${route.path}: ${err}`);
+        console.error(red(`Could not write file ${route.path}`));
+        console.error(err);
+        process.exit(1);
       }
     });
   }
   catch (err) {
-    console.error(`Could not load file ${config}: ${err}`);
+    console.error(red(`Could not load file ${config}`));
+    console.error(err);
+    process.exit(1);
   }
 }
 
@@ -154,9 +162,9 @@ function replacePathParams(path, parameters) {
       });
 
       if (replacement == null) {
-        console.error(
+        console.error(red(
           `In ${path}, no matching parameter name for ${component}`
-        );
+        ));
       }
       else {
         return replacement.value;
@@ -191,11 +199,4 @@ function generateHeaderParameters({ headerParameters }) {
     prev[curr.name] = getValue(curr);
     return prev;
   }, {});
-}
-
-function toSnake(string) {
-  return string
-  .replace(/^\//, '')
-  .split('/')
-  .join('-');
 }

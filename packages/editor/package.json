@@ -1,5 +1,5 @@
 {
-  "name": "editor",
+  "name": "@api-tools/editor",
   "version": "0.0.2-alpha.2",
   "description": "",
   "main": "index.js",
@@ -7,6 +7,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^2.4.2",
     "execa": "^1.0.0",
     "micro": "^9.3.3",
     "opn": "^5.4.0",
