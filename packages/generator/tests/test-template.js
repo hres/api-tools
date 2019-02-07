@@ -7,7 +7,7 @@ const key = __ENV.USER_KEY;
 const method = __ENV.METHOD || '${method}';
 const url = \`${url}\`;
 const payload = JSON.parse(\`${JSON.stringify(payload || {})}\`);
-const parameters = JSON.parse(\`${JSON.stringify(requestParameters)}\`);
+const parameters = JSON.parse(\`${JSON.stringify(requestParameters || {})}\`);
 
 const myFailRate = new Rate('failed requests');
 

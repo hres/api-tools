@@ -1,4 +1,5 @@
 const querystring = require('querystring');
+const { extname } = require('path');
 const { writeFile, readFile, stat, mkdirp } = require('fs-extra');
 const { merge, kebabCase } = require('lodash');
 const { red } = require('chalk');
@@ -86,9 +87,7 @@ async function loadEndpoints({ config, outdir, force, endpoints, template }) {
       // write the test scripts
       try {
         await createDirIfNotExists(outdir);
-        const path = `${outdir}${route.method}-${kebabCase(
-          route.path
-        )}.test.js`;
+        const path = getPath(outdir, route);
         try {
           await stat(path);
           // does exist, make sure for override
@@ -123,6 +122,14 @@ module.exports = {
   parseSpec,
   loadEndpoints
 };
+
+function getPath(outdir, route) {
+  let filename = route.filename || `${route.method}-${kebabCase(route.path)}`;
+  if (extname(filename) == '') {
+    filename = `${filename}.test.js`;
+  }
+  return `${outdir}${filename}`;
+}
 
 async function createDirIfNotExists(dir) {
   // if the output directory doesn't exist, make it
@@ -162,9 +169,9 @@ function replacePathParams(path, parameters) {
       });
 
       if (replacement == null) {
-        console.error(red(
-          `In ${path}, no matching parameter name for ${component}`
-        ));
+        console.error(
+          red(`In ${path}, no matching parameter name for ${component}`)
+        );
       }
       else {
         return replacement.value;

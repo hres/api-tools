@@ -4,7 +4,7 @@ const pkg = require('./package.json');
 const cli = require('commander');
 
 cli
-.command(pkg.name)
+.name('api-tools')
 .version(pkg.version)
 .command('edit', 'create/edit Swagger/OpenAPI document')
 .command(
