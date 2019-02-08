@@ -3,9 +3,9 @@ const { stat, mkdirp } = require('fs-extra');
 const cli = require('commander');
 const which = require('which');
 const execa = require('execa');
-const chalk = require('chalk');
+const { red, underline } = require('chalk');
 const globby = require('globby');
-const { rootResolve } = require('@api-tools/utils');
+const { addTrailingSlash, rootResolve } = require('@api-tools/utils');
 
 const DEFAULT_STAGE_LENGTH = '30s';
 const DEFAULT_VUES_PER_STAGE = 50;
@@ -27,6 +27,7 @@ cli
 .option(
   '-o, --outdir <dir>',
   'output folder for test results',
+  addTrailingSlash,
   'test-results/'
 )
 .option(
@@ -54,6 +55,7 @@ cli
   '-k, --k6-options',
   'define k6 cli options as a string (will be applied last so will override other settings)'
 )
+.option('-F, --force', 'forces overwriting of results when using format=file')
 .parse(process.argv);
 
 if (!process.argv.slice(2).length) {
@@ -68,9 +70,7 @@ if (!process.argv.slice(2).length) {
 
     if (!programExists('k6')) {
       console.log(
-        chalk.red(
-          'You must have the k6 binary installed to run the tests with k6'
-        )
+        red('You must have the k6 binary installed to run the tests with k6')
       );
       printDownloadLinks();
       process.exit(1);
@@ -115,8 +115,25 @@ if (!process.argv.slice(2).length) {
       const path = files[i];
       console.log(`Running test: ${path}`);
       const args = ['run', ...options, path];
+      const outputPath = `${cli.outdir}${basename(path).split('.')[0]}.txt`;
       if (cli.format === 'file') {
-        args.push('>', `${cli.outdir}${basename(path).split('.')[0]}.txt`);
+        try {
+          await stat(outputPath);
+          if (cli.force) {
+            args.push('>', outputPath);
+          }
+          else {
+            console.error(
+              red(
+                `Output path ${outputPath} already exists, use -F,--force to force overwriting`
+              )
+            );
+            process.exit(1);
+          }
+        }
+        catch (_) {
+          args.push('>', outputPath);
+        }
       }
       const command = ['k6', ...args].join(' ');
       await execa
@@ -134,7 +151,7 @@ function programExists(program) {
 }
 
 function printDownloadLinks() {
-  console.log(chalk.underline('https://docs.k6.io/docs/installation'));
+  console.log(underline('https://docs.k6.io/docs/installation'));
 }
 
 function createStageOption(vus) {
