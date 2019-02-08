@@ -12,6 +12,7 @@ async function parseSpec({
   source,
   outdir,
   filename,
+  endpoints,
   force,
   includeNonRequired = INCLUDE_NON_REQUIRED
 }) {

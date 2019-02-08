@@ -7,7 +7,8 @@ cli
 )
 // .command('api', 'generate api source code')
 // .command('documentation', 'generate api documentation')
-.command('tests', 'generate test scripts')
+.command('config', 'generate test config from Swagger/OpenAPI spec')
+.command('tests', 'generate test scripts from config file')
 .parse(process.argv);
 
 if (!process.argv.slice(2).length) {

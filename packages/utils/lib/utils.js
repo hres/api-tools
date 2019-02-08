@@ -10,5 +10,9 @@ module.exports = {
   addTrailingSlash(path) {
     if (path == null) throw new Error(`Path is not valid: ${path}`);
     return path[path.length - 1] === '/' ? path : path + '/';
+  },
+
+  split(items, token = ',') {
+    return items.split(token);
   }
 };
