@@ -1,5 +1,5 @@
 const cli = require('commander');
-const { parseSpec, loadEndpoints } = require('@api-tools/generator').Tests;
+const { loadEndpoints } = require('@api-tools/generator').Tests;
 const { rootResolve, addTrailingSlash, split } = require('@api-tools/utils');
 
 const DEFAULT_OUTDIR = 'tests/';
@@ -37,18 +37,19 @@ if (!cli.source) {
   process.exit(1);
 }
 
+console.log('here');
+
 (async() => {
-  if (cli.config) {
-    const outdir = addTrailingSlash(rootResolve(cli.outdir || DEFAULT_OUTDIR));
-    const filename = cli.filename || DEFAULT_FILENAME;
-    const configFile = cli.config || `${outdir}${filename}`;
-    await loadEndpoints({
-      config: configFile,
-      outdir,
-      force: cli.force,
-      endpoints: cli.onlyEndpoints,
-      template: rootResolve(cli.template),
-      includeNonRequired: cli.includeNonRequired
-    });
-  }
+  const outdir = addTrailingSlash(rootResolve(cli.outdir || DEFAULT_OUTDIR));
+  const filename = cli.filename || DEFAULT_FILENAME;
+  const config = cli.source || `${outdir}${filename}`;
+  console.log(outdir, filename, config);
+  await loadEndpoints({
+    config,
+    outdir,
+    force: cli.force,
+    endpoints: cli.onlyEndpoints,
+    template: rootResolve(cli.template),
+    includeNonRequired: cli.includeNonRequired
+  });
 })();
