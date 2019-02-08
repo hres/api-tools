@@ -24,6 +24,10 @@ cli
   DEFAULT_FILENAME
 )
 .option(
+  '-i, --include-non-required',
+  'whether to include non-required parameters in the config file'
+)
+.option(
   '-t, --template <path>',
   'a file that exports a javascript function that creates a test script'
 )
@@ -57,7 +61,8 @@ if (!cli.source && !cli.config) {
         filename,
         config: cli.config,
         force: cli.force,
-        endpoints: cli.onlyEndpoints
+        endpoints: cli.onlyEndpoints,
+        includeNonRequired: cli.includeNonRequired
       });
     }
     catch (err) {
@@ -70,7 +75,8 @@ if (!cli.source && !cli.config) {
       outdir,
       force: cli.force,
       endpoints: cli.onlyEndpoints,
-      template: rootResolve(cli.template)
+      template: rootResolve(cli.template),
+      includeNonRequired: cli.includeNonRequired
     });
   }
 })();
