@@ -8,11 +8,30 @@ const generateDefaultTestScript = require('./test-template.js');
 
 const INCLUDE_NON_REQUIRED = false;
 
-async function parseSpec({ source, outdir, filename, force }) {
-  return parse(source).then(async spec => {
+async function parseSpec({
+  source,
+  outdir,
+  filename,
+  force,
+  includeNonRequired = INCLUDE_NON_REQUIRED
+}) {
+  return parse(source, includeNonRequired).then(async spec => {
     try {
+      const path = `${outdir}${filename}`;
       await createDirIfNotExists(outdir, force);
-      await writeFile(`${outdir}${filename}`, JSON.stringify(spec, null, 2));
+      try {
+        await stat(path);
+        if (!force) {
+          console.error(
+            red('Path already exists, use -F/--force to force override')
+          );
+          process.exit(1);
+        }
+      }
+      catch (_) {
+        // fine
+      }
+      await writeFile(path, JSON.stringify(spec, null, 2));
     }
     catch (err) {
       console.error(red(`Could not write file ${outdir}`));
@@ -22,7 +41,14 @@ async function parseSpec({ source, outdir, filename, force }) {
   });
 }
 
-async function loadEndpoints({ config, outdir, force, endpoints, template }) {
+async function loadEndpoints({
+  config,
+  outdir,
+  force,
+  endpoints,
+  template,
+  includeNonRequired = INCLUDE_NON_REQUIRED
+}) {
   try {
     const spec = JSON.parse(await readFile(config, 'utf8'));
 
@@ -51,7 +77,8 @@ async function loadEndpoints({ config, outdir, force, endpoints, template }) {
         basePath: spec.basePath,
         path,
         queryParameters,
-        pathParameters
+        pathParameters,
+        includeNonRequired
       });
 
       const requestParameters = {
@@ -93,7 +120,7 @@ async function loadEndpoints({ config, outdir, force, endpoints, template }) {
           // does exist, make sure for override
           if (!force) {
             console.error(
-              'Path already exists, use -F/--force to force override'
+              red('Path already exists, use -F/--force to force override')
             );
             process.exit(1);
           }
@@ -147,12 +174,13 @@ function generateUrlFromParameters({
   basePath,
   path,
   queryParameters,
-  pathParameters
+  pathParameters,
+  includeNonRequired
 }) {
   return `${scheme}://${host}${basePath}${replacePathParams(
     path,
     pathParameters
-  )}${createQueryString(queryParameters)}`;
+  )}${createQueryString(queryParameters, includeNonRequired)}`;
 }
 
 function replacePathParams(path, parameters) {
@@ -182,10 +210,7 @@ function replacePathParams(path, parameters) {
   .join('/');
 }
 
-function createQueryString(
-  parameters,
-  includeNonRequired = INCLUDE_NON_REQUIRED
-) {
+function createQueryString(parameters, includeNonRequired) {
   return parameters == null || parameters.length === 0
     ? ''
     : '?' +

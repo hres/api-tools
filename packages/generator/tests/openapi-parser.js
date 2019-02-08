@@ -1,6 +1,6 @@
 const parser = require('json-schema-ref-parser');
 
-function parse(filepath) {
+function parse(filepath, includeNonRequired) {
   return parser
   .dereference(filepath)
   .then(({ schemes, basePath, host, paths }) => {
@@ -13,7 +13,11 @@ function parse(filepath) {
         endpoints.push({
           method: method.toUpperCase(),
           path,
-          parameters: paths[path][method].parameters.map(getParameterInfo)
+          parameters: paths[path][method].parameters
+          .map(getParameterInfo)
+          .filter(
+            ({ required }) => required === true || includeNonRequired
+          )
         });
       });
     });
@@ -35,7 +39,7 @@ function getValue(pathParameter) {
   if (pathParameter.value) return pathParameter.value;
   if (pathParameter.default) return pathParameter.default;
   if (pathParameter.example) return pathParameter.example;
-  if (pathParameter.enum && pathParameter.length >= 1)
+  if (pathParameter.enum && pathParameter.enum.length >= 1)
     return pathParameter.enum[0];
 
   // let the user put in their own value
