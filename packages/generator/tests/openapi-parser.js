@@ -6,7 +6,9 @@ function parse(filepath) {
   .then(({ schemes, basePath, host, paths }) => {
     const endpoints = [];
     // can have multiple http methods for each path
-    Object.keys(paths).forEach(path => {
+    Object.keys(paths)
+    .sort()
+    .forEach(path => {
       Object.keys(paths[path]).forEach(method => {
         endpoints.push({
           method: method.toUpperCase(),
