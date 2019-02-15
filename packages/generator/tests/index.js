@@ -17,6 +17,13 @@ async function parseSpec({
   includeNonRequired = INCLUDE_NON_REQUIRED
 }) {
   return parse(source, includeNonRequired).then(async spec => {
+    if (endpoints != null && endpoints.length > 0) {
+      spec.endpoints = spec.endpoints.filter(
+        endpoint =>
+          endpoints.filter(e => new RegExp(e).test(endpoint.path)).length > 0
+      );
+    }
+
     try {
       const path = `${outdir}${filename}`;
       await createDirIfNotExists(outdir, force);
@@ -62,7 +69,7 @@ async function loadEndpoints({
     }
 
     spec.endpoints.forEach(async route => {
-      const { path, parameters } = route;
+      const { path, parameters = [] } = route;
       const queryParameters = parameters.filter(
         parameter => parameter.in === 'query'
       );
@@ -82,9 +89,13 @@ async function loadEndpoints({
         includeNonRequired
       });
 
-      const requestParameters = {
-        headers: generateHeaderParameters({ headerParameters })
-      };
+      const requestParameters = {};
+
+      if (headerParameters != null && headerParameters.length > 0) {
+        requestParameters.headers = generateHeaderParameters({
+          headerParameters
+        });
+      }
 
       // if user has provided a `template` prop in the config file or provided
       // a `template` option through the cli, use that instead
