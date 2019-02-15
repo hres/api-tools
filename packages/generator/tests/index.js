@@ -101,7 +101,7 @@ async function loadEndpoints({
       // a `template` option through the cli, use that instead
       let script;
       const args = {
-        method: route.method,
+        method: route.method || 'GET',
         url,
         payload: route.payload,
         requestParameters: merge(route.requestParameters, requestParameters)
