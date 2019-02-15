@@ -37,8 +37,6 @@ if (!cli.source) {
   process.exit(1);
 }
 
-console.log('here');
-
 (async() => {
   const outdir = addTrailingSlash(rootResolve(cli.outdir || DEFAULT_OUTDIR));
   const filename = cli.filename || DEFAULT_FILENAME;

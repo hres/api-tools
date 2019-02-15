@@ -3,7 +3,7 @@ const { red } = require('chalk');
 const { parseSpec } = require('@api-tools/generator').Tests;
 const { rootResolve, addTrailingSlash, split } = require('@api-tools/utils');
 
-const DEFAULT_OUTDIR = 'tests/';
+const DEFAULT_OUTDIR = './';
 const DEFAULT_FILENAME = 'test-config.json';
 
 cli
@@ -23,8 +23,8 @@ cli
   DEFAULT_FILENAME
 )
 .option(
-  '-i, --include-non-required',
-  'whether to include non-required parameters in the config file'
+  '-i, --ignore-non-required',
+  'whether to ignore non-required parameters in the config file'
 )
 .option(
   '-e, --endpoints <regexps>',
@@ -37,7 +37,6 @@ cli
 (async() => {
   const outdir = addTrailingSlash(rootResolve(cli.outdir || DEFAULT_OUTDIR));
   const filename = cli.filename || DEFAULT_FILENAME;
-  const configFile = cli.config || `${outdir}${filename}`;
   if (cli.source) {
     const source = rootResolve(cli.source);
     try {
@@ -47,7 +46,7 @@ cli
         filename,
         force: cli.force,
         endpoints: cli.onlyEndpoints,
-        includeNonRequired: cli.includeNonRequired
+        includeNonRequired: !cli.ignoreNonRequired
       });
     }
     catch (err) {
