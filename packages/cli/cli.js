@@ -12,6 +12,7 @@ cli
   'generate source code, test scripts, and documentation from Swagger/OpenAPI document'
 )
 .command('test', 'test api endpoints')
+.command('report', 'report test result information')
 .parse(process.argv);
 
 if (!process.argv.slice(2).length) {
