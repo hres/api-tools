@@ -5,14 +5,11 @@ const which = require('which');
 const execa = require('execa');
 const { red, underline } = require('chalk');
 const globby = require('globby');
-const { addTrailingSlash, rootResolve } = require('@api-tools/utils');
+const { addTrailingSlash, rootResolve, sleep } = require('@api-tools/utils');
 
 const DEFAULT_STAGE_LENGTH = '30s';
 const DEFAULT_VUES_PER_STAGE = 50;
-
-function splitList(items, token = ',') {
-  return items.split(token);
-}
+const COOL_DOWN_SECONDS = 10;
 
 function collect(value, collector = []) {
   collector.push(value);
@@ -22,7 +19,10 @@ function collect(value, collector = []) {
 cli
 .name('api-tools test')
 .description('Allows for integration, e2e, and performance testing')
-.option('-s, --source <glob>', 'glob of test files to run')
+.option(
+  '-s, --source <glob>',
+  'glob of test files to run (must wrap glob patterns in quotes)'
+)
 .option('-c, --config <file>', 'provide k6 config file')
 .option(
   '-o, --outdir <dir>',
@@ -64,7 +64,7 @@ if (!process.argv.slice(2).length) {
 
 (async() => {
   try {
-    const files = await globby(rootResolve(cli.source));
+    const files = (await globby([rootResolve(cli.source)])).sort();
     if (files.length === 0)
       throw new Error(`${cli.source} did not match any options`);
 
@@ -139,6 +139,11 @@ if (!process.argv.slice(2).length) {
       await execa
       .shell(command, { stdio: 'inherit' })
       .catch(err => console.error(`Error with script ${path}: ${err}`));
+
+      // let it cool down
+      console.log(`Test finished, cooling down for ${COOL_DOWN_SECONDS}s`);
+      await sleep(COOL_DOWN_SECONDS * 1000);
+      console.log('Done');
     }
   }
   catch (err) {
