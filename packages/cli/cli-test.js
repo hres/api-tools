@@ -52,6 +52,11 @@ cli
 )
 .option('-a, --average <n>', 'run \'n\' iterations and get the average')
 .option(
+  '-w, --wait',
+  'define a cooldown period between tests',
+  COOL_DOWN_SECONDS
+)
+.option(
   '-k, --k6-options',
   'define k6 cli options as a string (will be applied last so will override other settings)'
 )
@@ -141,7 +146,7 @@ if (!process.argv.slice(2).length) {
       .catch(err => console.error(`Error with script ${path}: ${err}`));
 
       // let it cool down
-      console.log(`Test finished, cooling down for ${COOL_DOWN_SECONDS}s`);
+      console.log(`Cooling down for ${COOL_DOWN_SECONDS}s`);
       await sleep(COOL_DOWN_SECONDS * 1000);
       console.log('Done');
     }
