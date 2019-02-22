@@ -1,5 +1,5 @@
 const cli = require('commander');
-const { startEditor } = require('@api-tools/editor');
+const { startEditor } = require('../editor');
 
 cli
 .name('api-tools edit')

@@ -42,7 +42,7 @@
       "packages/generator/node_modules/fast-deep-equal/index.js"
     ],
     "assets": [
-      "packages/editor/node_modules/swagger-editor-dist"
+      "packages/editor/node_modules/swagger-editor-dist/"
     ]
   }
 }

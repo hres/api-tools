@@ -3,7 +3,7 @@ const { readFile } = require('fs-extra');
 const globby = require('globby');
 const cli = require('commander');
 const { red } = require('chalk');
-const { rootResolve } = require('@api-tools/utils');
+const { rootResolve } = require('..//utils');
 
 cli
 .name('api-tools test extract')

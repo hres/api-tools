@@ -1,7 +1,7 @@
 const cli = require('commander');
 const { red } = require('chalk');
-const { parseSpec } = require('@api-tools/generator').Tests;
-const { rootResolve, addTrailingSlash, split } = require('@api-tools/utils');
+const { parseSpec } = require('../generator').Tests;
+const { rootResolve, addTrailingSlash, split } = require('../utils');
 
 const DEFAULT_OUTDIR = './';
 const DEFAULT_FILENAME = 'test-config.json';

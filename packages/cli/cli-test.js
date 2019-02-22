@@ -5,7 +5,7 @@ const which = require('which');
 const execa = require('execa');
 const { red, underline } = require('chalk');
 const globby = require('globby');
-const { addTrailingSlash, rootResolve, sleep } = require('@api-tools/utils');
+const { addTrailingSlash, rootResolve, sleep } = require('../utils/');
 
 const DEFAULT_STAGE_LENGTH = '30s';
 const DEFAULT_VUES_PER_STAGE = 50;
