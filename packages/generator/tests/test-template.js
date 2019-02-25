@@ -9,18 +9,18 @@ const url = __ENV.URL || \`${url}\`;
 const payload = JSON.parse(\`${JSON.stringify(payload || {})}\`);
 const parameters = JSON.parse(\`${JSON.stringify(requestParameters || {})}\`);
 
-const myFailRate = new Rate('failed requests');
+// const myFailRate = new Rate('failed requests');
 
 export const options = {
-  thresholds: {
-    'failed requests': [
-      {
-        threshold: 'rate<0.1',
-        abortOnFail: true,
-        delayAbortEval: '10s'
-      }
-    ]
-  }
+  // thresholds: {
+  //   'failed requests': [
+  //     {
+  //       threshold: 'rate<0.1',
+  //       abortOnFail: true,
+  //       delayAbortEval: '10s'
+  //     }
+  //   ]
+  // }
 };
 
 export default function() {
@@ -31,7 +31,7 @@ export default function() {
     parameters
   );
 
-  myFailRate.add(response.status !== 200);
+  // myFailRate.add(response.status !== 200);
 
   check(response, {
     'status 200': r => r.status === 200,
